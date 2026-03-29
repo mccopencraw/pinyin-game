@@ -1,0 +1,5 @@
+-e *.py
+*.pyc
+__pycache__/
+audio/*.mp3
+
