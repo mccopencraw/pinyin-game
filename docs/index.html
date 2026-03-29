@@ -615,27 +615,46 @@ const TONES = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// 2. 音頻 — Web Speech API
+// 2. 音頻 — Google TTS via CORS proxy
 // ═══════════════════════════════════════════════════════════
 
-let speechSynth = window.speechSynthesis;
-let currentUtterance = null;
+let _audioCache = {};
+let _activeAudio = null;
 
-function speak(text, lang = 'zh-CN') {
-  if (!speechSynth) return;
-  speechSynth.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = lang;
-  u.rate = 0.85;
-  u.pitch = 1.0;
-  // Try to pick a good voice
-  const voices = speechSynth.getVoices();
-  const zhVoice = voices.find(v => v.lang.includes('zh') && v.lang.includes('CN')) ||
-                     voices.find(v => v.lang.includes('zh'));
-  if (zhVoice) u.voice = zhVoice;
-  speechSynth.speak(u);
-  currentUtterance = u;
-  return u;
+// Google TTS via proxy (reliable Chinese pronunciation)
+function speak(text) {
+  // Cancel previous
+  if (_activeAudio) {
+    _activeAudio.pause();
+    _activeAudio = null;
+  }
+
+  const encoded = encodeURIComponent(text);
+  // Use corsproxy.io to bypass CORS
+  const url = `https://corsproxy.io/?${encodeURIComponent(
+    `https://translate.google.com/translate_tts?ie=UTF-8&q=${encoded}&tl=zh-CN&client=tw-ob`
+  )}`;
+
+  const audio = new Audio(url);
+  audio.play().catch(() => {
+    // Fallback: Web Speech API
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN';
+    u.rate = 0.9;
+    const zhVoice = speechSynthesis.getVoices().find(
+      v => v.lang.includes('zh') && !v.lang.includes('HK') && !v.lang.includes('TW')
+    );
+    if (zhVoice) u.voice = zhVoice;
+    speechSynthesis.speak(u);
+  });
+  _activeAudio = audio;
+}
+
+// Pre-warm voices
+if (window.speechSynthesis) {
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -906,11 +925,6 @@ function updateBestDisplay() {
 // ═══════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Preload voices
-  if (speechSynth) {
-    speechSynth.onvoiceschanged = () => speechSynth.getVoices();
-  }
-  // Initial best display
   updateBestDisplay();
 });
 </script>
