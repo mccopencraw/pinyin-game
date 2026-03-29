@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🇨🇳 普通話發音大挑戰</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0f0f23;
+    --card: #1a1a3e;
+    --accent: #ff6b6b;
+    --gold: #ffd93d;
+    --cyan: #6bcfff;
+    --green: #6bffb8;
+    --purple: #c77dff;
+    --text: #ffffff;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* Stars background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(1px 1px at 20% 30%, white, transparent),
+      radial-gradient(1px 1px at 40% 70%, white, transparent),
+      radial-gradient(1px 1px at 60% 20%, white, transparent),
+      radial-gradient(1px 1px at 80% 60%, white, transparent),
+      radial-gradient(1.5px 1.5px at 10% 80%, white, transparent),
+      radial-gradient(1.5px 1.5px at 90% 10%, white, transparent),
+      radial-gradient(1px 1px at 50% 50%, white, transparent),
+      radial-gradient(1px 1px at 30% 90%, white, transparent),
+      radial-gradient(1px 1px at 70% 40%, white, transparent);
+    background-size: 250px 250px;
+    animation: twinkle 4s ease-in-out infinite alternate;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  @keyframes twinkle {
+    from { opacity: 0.4; }
+    to   { opacity: 0.8; }
+  }
+
+  .screen {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ─────────────────────────── */
+  .header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+    opacity: 0.8;
+  }
+
+  .score-display {
+    display: flex;
+    gap: 16px;
+  }
+
+  .score-display span {
+    background: var(--card);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  /* ── MENU SCREEN ─────────────────────── */
+  .menu-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .menu-title {
+    text-align: center;
+  }
+
+  .menu-title h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+
+  .menu-title p {
+    font-size: 14px;
+    opacity: 0.7;
+  }
+
+  .mode-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .mode-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 2px solid transparent;
+    user-select: none;
+  }
+
+  .mode-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .mode-card:active { transform: scale(0.97); }
+
+  .mode-card.selected {
+    border-color: var(--cyan);
+    box-shadow: 0 0 20px rgba(107, 207, 255, 0.3);
+  }
+
+  .mode-card .icon { font-size: 36px; margin-bottom: 8px; }
+  .mode-card .name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .mode-card .desc { font-size: 11px; opacity: 0.6; }
+
+  .start-btn {
+    background: linear-gradient(135deg, var(--accent), #ff8e53);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 48px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 8px;
+  }
+
+  .start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 107, 107, 0.5);
+  }
+
+  .start-btn:active { transform: scale(0.97); }
+
+  /* ── GAME SCREEN ─────────────────────── */
+  .game-screen {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .game-progress {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--card);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: 12px;
+    text-align: right;
+    opacity: 0.6;
+  }
+
+  .question-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 32px 24px;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(107,207,255,0.05), rgba(199,125,255,0.05));
+    pointer-events: none;
+  }
+
+  .question-type {
+    font-size: 13px;
+    opacity: 0.6;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .question-pinyin {
+    font-size: 48px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tone-indicator {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tone-1 { background: #ff6b6b; }
+  .tone-2 { background: #ffd93d; color: #333; }
+  .tone-3 { background: #6bffb8; color: #333; }
+  .tone-4 { background: #6bcfff; }
+
+  .question-char {
+    font-size: 20px;
+    opacity: 0.5;
+    margin-bottom: 16px;
+  }
+
+  .play-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 20px rgba(107, 207, 255, 0.4);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(107, 207, 255, 0.4); }
+    50% { box-shadow: 0 4px 40px rgba(107, 207, 255, 0.8); }
+  }
+
+  .play-btn:active { transform: scale(0.9); }
+
+  /* Answer options */
+  .answer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .answer-btn {
+    background: var(--card);
+    border: 2px solid rgba(255,255,255,0.1);
+    color: white;
+    border-radius: 14px;
+    padding: 16px 8px;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .answer-btn:hover {
+    border-color: var(--cyan);
+    background: rgba(107, 207, 255, 0.1);
+  }
+
+  .answer-btn:active { transform: scale(0.95); }
+
+  .answer-btn.correct {
+    background: var(--green);
+    border-color: var(--green);
+    color: #000;
+    animation: pop 0.3s;
+  }
+
+  .answer-btn.wrong {
+    background: var(--accent);
+    border-color: var(--accent);
+    animation: shake 0.3s;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* Hint */
+  .hint-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.5);
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  .hint-text {
+    font-size: 12px;
+    color: var(--gold);
+    margin-top: 8px;
+    opacity: 0.9;
+  }
+
+  /* Streak */
+  .streak-badge {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--gold), #ff8e53);
+    color: #000;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 10;
+    transition: transform 0.3s;
+    display: none;
+  }
+
+  .streak-badge.show {
+    display: block;
+    animation: bounceIn 0.4s;
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  /* Result popup */
+  .result-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .result-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 32px;
+    text-align: center;
+    max-width: 360px;
+    width: 90%;
+  }
+
+  .result-icon { font-size: 64px; margin-bottom: 16px; }
+  .result-score { font-size: 48px; font-weight: 800; margin-bottom: 8px; }
+  .result-label { font-size: 14px; opacity: 0.6; margin-bottom: 24px; }
+  .result-stats { display: flex; justify-content: center; gap: 24px; margin-bottom: 24px; }
+  .result-stat { text-align: center; }
+  .result-stat .num { font-size: 24px; font-weight: 700; }
+  .result-stat .label { font-size: 11px; opacity: 0.5; }
+
+  .result-actions { display: flex; flex-direction: column; gap: 10px; }
+
+  .result-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .result-btn:active { transform: scale(0.97); }
+  .result-btn.primary {
+    background: linear-gradient(135deg, var(--accent), #ff8e53);
+    color: white;
+  }
+
+  .result-btn.secondary {
+    background: rgba(255,255,255,0.1);
+    color: white;
+  }
+
+  /* Back button */
+  .back-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    cursor: pointer;
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Responsive */
+  @media (max-height: 700px) {
+    .question-card { padding: 20px 16px; }
+    .question-pinyin { font-size: 36px; }
+    .play-btn { width: 64px; height: 64px; font-size: 24px; }
+    .answer-btn { padding: 12px 8px; font-size: 18px; }
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     MENU SCREEN
+════════════════════════════════════════ -->
+<div class="screen menu-screen" id="menuScreen">
+  <div class="header">
+    <span>🇨🇳 普通話發音</span>
+    <div class="score-display">
+      <span>🏆 <span id="menuBest">0</span></span>
+    </div>
+  </div>
+
+  <div class="menu-title">
+    <h1>普通話發音大挑戰</h1>
+    <p>聽發音，揀答案，學聲母韻母聲調</p>
+  </div>
+
+  <div class="mode-cards">
+    <div class="mode-card selected" data-mode="tone" onclick="selectMode('tone')">
+      <div class="icon">🎶</div>
+      <div class="name">聲調識別</div>
+      <div class="desc">聽音，答1-4聲</div>
+    </div>
+    <div class="mode-card" data-mode="initial" onclick="selectMode('initial')">
+      <div class="icon">🎯</div>
+      <div class="name">聲母識別</div>
+      <div class="desc">聽音，揀聲母</div>
+    </div>
+    <div class="mode-card" data-mode="final" onclick="selectMode('final')">
+      <div class="icon">🔤</div>
+      <div class="name">韻母識別</div>
+      <div class="desc">聽音，揀韻母</div>
+    </div>
+    <div class="mode-card" data-mode="syllable" onclick="selectMode('syllable')">
+      <div class="icon">⭐</div>
+      <div class="name">混合挑戰</div>
+      <div class="desc">聲母+韻母+聲調</div>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="startGame()">開始挑戰 🚀</button>
+
+  <p style="font-size:11px;opacity:0.3;margin-top:16px;">
+    👆 點擊 🎵 播放發音｜✅ 已學：b p m f d t n / a o e i u ü er
+  </p>
+</div>
+
+<!-- ════════════════════════════════════════
+     GAME SCREEN
+════════════════════════════════════════ -->
+<div class="screen game-screen" id="gameScreen">
+  <div class="game-progress">
+    <button class="back-btn" onclick="showMenu()">← 返回</button>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text"><span id="currentQ">0</span>/10 · 🏆 <span id="scoreDisplay">0</span>分 · 🔥 <span id="streakDisplay">0</span>連勝</div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-type" id="questionType">聲調識別</div>
+
+    <button class="play-btn" id="playBtn" onclick="playCurrent()">
+      🔊
+    </button>
+
+    <div class="question-pinyin" id="questionText"></div>
+    <div class="question-char" id="questionHint"></div>
+
+    <div class="answer-grid" id="answerGrid"></div>
+    <div class="hint-text hidden" id="hintText"></div>
+    <button class="hint-btn" id="hintBtn" onclick="showHint()">💡 提示</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     RESULT OVERLAY
+════════════════════════════════════════ -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card">
+    <div class="result-icon" id="resultIcon">🎉</div>
+    <div class="result-score" id="resultScore">0/10</div>
+    <div class="result-label" id="resultLabel">你真棒！</div>
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="num" id="resultCorrect">0</div>
+        <div class="label">正確</div>
+      </div>
+      <div class="result-stat">
+        <div class="num" id="resultBest">0</div>
+        <div class="label">最佳</div>
+      </div>
+      <div class="result-stat">
+        <div class="num" id="resultStreak">0</div>
+        <div class="label">最高連勝</div>
+      </div>
+    </div>
+    <div class="result-actions">
+      <button class="result-btn primary" onclick="startGame()">再玩一次 🔄</button>
+      <button class="result-btn secondary" onclick="showMenu()">返回主頁</button>
+    </div>
+  </div>
+</div>
+
+<!-- Streak badge -->
+<div class="streak-badge" id="streakBadge">🔥 0連勝！</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// 1. 教學內容
+// ═══════════════════════════════════════════════════════════
+
+const INITIALS = [
+  ['b','玻'],['p','潑'],['m','摸'],['f','佛'],
+  ['d','得'],['t','特'],['n','呢'],['l','勒'],
+  ['g','哥'],['k','科'],['h','喝'],
+  ['j','基'],['q','欺'],['x','希'],
+  ['zh','知'],['ch','蚩'],['sh','詩'],['r','日'],
+  ['z','資'],['c','雌'],['s','思'],
+  ['y','呀'],['w','蛙'],
+];
+
+// 已學聲母
+const LEARNED_INITIALS = [['b','玻'],['p','潑'],['m','摸'],['f','佛'],['d','得'],['t','特'],['n','呢'],['l','勒']];
+// 未學聲母
+const NEW_INITIALS = INITIALS.filter(([k]) => !['b','p','m','f','d','t','n','l'].includes(k));
+
+const FINALS_SIMPLE = [['a','啊'],['o','哦'],['e','鵝'],['i','衣'],['u','屋'],['ü','魚']];
+const FINALS_LEARNED = [['a','啊'],['o','哦'],['e','鵝'],['i','衣'],['u','屋'],['ü','魚']]; // 已學
+const FINALS_NEW = [
+  ['ai','愛'],['ei','欸'],['ui','堆'],
+  ['ao','奧'],['ou','歐'],['iu','優'],
+  ['ie','椰'],['üe','月'],['er','耳'],
+  ['an','安'],['en','恩'],['in','音'],['un','溫'],['ün','雲'],
+  ['ang','昂'],['eng','鞥'],['ing','英'],['ong','翁'],
+];
+
+const TONES = {
+  1: { pinyin: 'mā', char: '媽', name: '第一聲', desc: '高平　¯', symbol: 'ˉ' },
+  2: { pinyin: 'má', char: '麻', name: '第二聲', desc: '上升　/ ', symbol: 'ˊ' },
+  3: { pinyin: 'měi', char: '美', name: '第三聲', desc: '降升 ∨ ', symbol: 'ˇ' },
+  4: { pinyin: 'mà', char: '麻', name: '第四聲', desc: '下降　\\', symbol: 'ˋ' },
+};
+
+// ═══════════════════════════════════════════════════════════
+// 2. 音頻 — Web Speech API
+// ═══════════════════════════════════════════════════════════
+
+let speechSynth = window.speechSynthesis;
+let currentUtterance = null;
+
+function speak(text, lang = 'zh-CN') {
+  if (!speechSynth) return;
+  speechSynth.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang;
+  u.rate = 0.85;
+  u.pitch = 1.0;
+  // Try to pick a good voice
+  const voices = speechSynth.getVoices();
+  const zhVoice = voices.find(v => v.lang.includes('zh') && v.lang.includes('CN')) ||
+                     voices.find(v => v.lang.includes('zh'));
+  if (zhVoice) u.voice = zhVoice;
+  speechSynth.speak(u);
+  currentUtterance = u;
+  return u;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 3. 題庫
+// ═══════════════════════════════════════════════════════════
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function generateToneQuestion() {
+  const tone = Math.floor(Math.random() * 4) + 1;
+  const info = TONES[tone];
+  const syllables = {
+    1: ['mā','bā','dā','gē','hā'],
+    2: ['má','bá','dá','gé','há'],
+    3: ['měi','běi','děi','gěi','hěi'],
+    4: ['mà','bà','dà','gè','hà'],
+  };
+  const syllable = rand(syllables[tone]);
+  const options = shuffle([1,2,3,4]);
+  return {
+    type: 'tone',
+    typeName: '聲調識別',
+    audio: syllable,
+    correct: String(tone),
+    options: options.map(String),
+    hint: `提示：${info.name}（${info.desc}）`,
+    display: '',
+    charHint: `如 ${info.char} 字`,
+  };
+}
+
+function generateInitialQuestion() {
+  // 混合已學 + 未學聲母
+  const pool = shuffle([...LEARNED_INITIALS, ...NEW_INITIALS]).slice(0, 16);
+  const [initial, char] = rand(pool);
+  const finals = ['a','i','u','e','o'];
+  const final = rand(finals);
+  const syllable = initial + final;
+  const options = shuffle(pool.slice(0, 4));
+  const correctIdx = options.findIndex(([k]) => k === initial);
+  return {
+    type: 'initial',
+    typeName: '聲母識別',
+    audio: syllable,
+    correct: initial,
+    options: options.map(([k]) => k),
+    optionLabels: options.map(([k, c]) => `${k}（${c}）`),
+    hint: `提示：以「${char}」字開頭`,
+    display: '',
+    charHint: '',
+  };
+}
+
+function generateFinalQuestion() {
+  const finals = [...FINALS_LEARNED, ...FINALS_NEW];
+  const [final, char] = rand(finals);
+  const initials = ['b','p','d','t','g','k','h','m','n','l'];
+  const initial = rand(initials);
+  const syllable = initial + final;
+  const options = shuffle(finals.slice(0, 4));
+  return {
+    type: 'final',
+    typeName: '韻母識別',
+    audio: syllable,
+    correct: final,
+    options: options.map(([k]) => k),
+    optionLabels: options.map(([k, c]) => `${k}（${c}）`),
+    hint: `提示：「${char}」尾音`,
+    display: '',
+    charHint: '',
+  };
+}
+
+function generateSyllableQuestion() {
+  const modes = [generateToneQuestion, generateInitialQuestion, generateFinalQuestion];
+  return rand(modes)();
+}
+
+const QUESTION_GENERATORS = {
+  tone: generateToneQuestion,
+  initial: generateInitialQuestion,
+  final: generateFinalQuestion,
+  syllable: generateSyllableQuestion,
+};
+
+// ═══════════════════════════════════════════════════════════
+// 4. 遊戲狀態
+// ═══════════════════════════════════════════════════════════
+
+let state = {
+  mode: 'tone',
+  question: null,
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  round: 0,
+  totalRounds: 10,
+  answered: false,
+  bestScores: JSON.parse(localStorage.getItem('pinyin_best') || '{}'),
+};
+
+// ═══════════════════════════════════════════════════════════
+// 5. UI 函數
+// ═══════════════════════════════════════════════════════════
+
+function selectMode(mode) {
+  state.mode = mode;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`[data-mode="${mode}"]`).classList.add('selected');
+}
+
+function showMenu() {
+  document.getElementById('menuScreen').style.display = 'flex';
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('resultOverlay').style.display = 'none';
+  updateBestDisplay();
+}
+
+function startGame() {
+  state.score = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.round = 0;
+  state.answered = false;
+
+  document.getElementById('menuScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'flex';
+  document.getElementById('resultOverlay').style.display = 'none';
+
+  nextQuestion();
+}
+
+function nextQuestion() {
+  state.round++;
+  state.answered = false;
+
+  const gen = QUESTION_GENERATORS[state.mode];
+  state.question = gen();
+
+  // Update UI
+  document.getElementById('questionType').textContent = state.question.typeName;
+  document.getElementById('questionText').textContent = state.question.display || '';
+  document.getElementById('questionHint').textContent = state.question.charHint;
+  document.getElementById('hintText').classList.add('hidden');
+  document.getElementById('currentQ').textContent = state.round;
+  document.getElementById('scoreDisplay').textContent = state.score;
+  document.getElementById('streakDisplay').textContent = state.streak;
+  document.getElementById('progressFill').style.width = `${(state.round - 1) / state.totalRounds * 100}%`;
+
+  // Build answer buttons
+  const grid = document.getElementById('answerGrid');
+  grid.innerHTML = '';
+  const labels = state.question.optionLabels || state.question.options;
+
+  state.question.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = labels[i] || opt;
+    btn.dataset.answer = opt;
+    btn.onclick = () => handleAnswer(opt, btn);
+    grid.appendChild(btn);
+  });
+
+  // Auto-play audio
+  setTimeout(() => playCurrent(), 400);
+}
+
+function playCurrent() {
+  if (!state.question) return;
+  speak(state.question.audio);
+}
+
+function showHint() {
+  const el = document.getElementById('hintText');
+  el.textContent = state.question.hint;
+  el.classList.remove('hidden');
+}
+
+function handleAnswer(answer, btnEl) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const correct = answer === state.question.correct;
+  const buttons = document.querySelectorAll('.answer-btn');
+
+  if (correct) {
+    state.score++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    btnEl.classList.add('correct');
+    speak('正確！好嘢！');
+    showStreakBadge();
+  } else {
+    state.streak = 0;
+    btnEl.classList.add('wrong');
+    // Show correct answer
+    buttons.forEach(b => {
+      if (b.dataset.answer === state.question.correct) {
+        b.classList.add('correct');
+      }
+    });
+    speak('再試過！');
+  }
+
+  document.getElementById('scoreDisplay').textContent = state.score;
+  document.getElementById('streakDisplay').textContent = state.streak;
+
+  // Next or finish
+  setTimeout(() => {
+    if (state.round >= state.totalRounds) {
+      showResult();
+    } else {
+      nextQuestion();
+    }
+  }, 1500);
+}
+
+function showStreakBadge() {
+  const badge = document.getElementById('streakBadge');
+  if (state.streak >= 2) {
+    badge.textContent = `🔥 ${state.streak}連勝！`;
+    badge.classList.remove('show');
+    void badge.offsetWidth; // reflow
+    badge.classList.add('show');
+    setTimeout(() => badge.classList.remove('show'), 2000);
+  }
+}
+
+function showResult() {
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('resultOverlay').style.display = 'flex';
+
+  const pct = state.score / state.totalRounds;
+  const icons = ['😢','😕','😊','🎉','🏆'];
+  const labels = ['加油！', '再試過！', '做得好！', '好勁！', '滿分！'];
+  const idx = Math.min(4, Math.floor(pct * 5));
+
+  document.getElementById('resultIcon').textContent = icons[idx];
+  document.getElementById('resultScore').textContent = `${state.score}/${state.totalRounds}`;
+  document.getElementById('resultLabel').textContent = labels[idx];
+  document.getElementById('resultCorrect').textContent = state.score;
+  document.getElementById('resultBest').textContent = Math.max(state.score, state.bestScores[state.mode] || 0);
+  document.getElementById('resultStreak').textContent = state.bestStreak;
+
+  // Save best
+  if (!state.bestScores[state.mode] || state.score > state.bestScores[state.mode]) {
+    state.bestScores[state.mode] = state.score;
+    localStorage.setItem('pinyin_best', JSON.stringify(state.bestScores));
+  }
+}
+
+function updateBestDisplay() {
+  const best = state.bestScores[state.mode] || 0;
+  document.getElementById('menuBest').textContent = best;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 6. 初始化
+// ═══════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Preload voices
+  if (speechSynth) {
+    speechSynth.onvoiceschanged = () => speechSynth.getVoices();
+  }
+  // Initial best display
+  updateBestDisplay();
+});
+</script>
+</body>
+</html>
